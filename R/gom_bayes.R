@@ -12,6 +12,8 @@
 #' @param gomscores Prefix of the gamma column names.
 #'
 #' @return A list with the posterior distribution of gamma, lambda, Xi and a latent variable z
+#'
+#' @importFrom  rlang .data
 #' @export
 gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000,
                       omega = 50, eta = 10, tau = 2, beta = 2, gomscores = "g"){
@@ -26,7 +28,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
     nvars = ncol(ugom_X)
 
 
-    ugom_z = matrix(runif(n*nvars), nrow = n, ncol = nvars)
+    ugom_z = matrix(stats::runif(n*nvars), nrow = n, ncol = nvars)
     pr = matrix(0, nrow = 1, ncol = K)
     for(i in 1:n){
       for(j in 1:nvars){
@@ -55,7 +57,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
       for(k in 1:K){
         a = 1 + sum((ugom_X[, j] != 0) * (ugom_z[, j] == k))
         b = 1 + sum((ugom_X[, j] == 0) * (ugom_z[, j] == k))
-        ugom_L[j, k] = qbeta(runif(1), shape1 = a, shape2 = b) ### Lembrar de baixar pacote com a função pinvbeta
+        ugom_L[j, k] = stats::qbeta(stats::runif(1), shape1 = a, shape2 = b) ### Lembrar de baixar pacote com a função pinvbeta
       }
     }
     newalpha = matrix(0, nrow = 1, ncol = K)
@@ -135,7 +137,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
 
     # Draw candidate point for a0
 
-    a0star = qgamma(runif(1), omega) * a0/omega
+    a0star = stats::qgamma(stats::runif(1), omega) * a0/omega
 
     # Calculate proposal ratio for a0
 
@@ -153,7 +155,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
     # Update a0 if necessary
 
     change = 0
-    if(runif(1) < ra0) {
+    if(stats::runif(1) < ra0) {
       a0 = a0star
       change = 1
     }
@@ -178,7 +180,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
 
     # Update if necessary
 
-    if(runif(1) < re0) {
+    if(stats::runif(1) < re0) {
       xi = xistar
       change = 1
     }
@@ -201,7 +203,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
     } else{
       ugom_alpha <- matrix(0.25, nrow = 1, ncol = ntypes)
     }
-    ugom_L <- matrix(runif(ntypes*ncol(ugom_X)), nrow = ncol(ugom_X), ncol = ntypes)
+    ugom_L <- matrix(stats::runif(ntypes*ncol(ugom_X)), nrow = ncol(ugom_X), ncol = ntypes)
     #ugom_L <- matrix(c(.9472316166,   .0522233748,
     #                   .9743182755,   .9457483679,
     #                   .1856478315,   .9487333737,
@@ -216,7 +218,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   randomdirichlet <- function(alpha){
     d <- vector(length = length(alpha))
     for(j in 1:length(alpha)){
-      d[j] = qgamma(shape = alpha[j], p=runif(1))
+      d[j] = stats::qgamma(shape = alpha[j], p=stats::runif(1))
       if(is.null(d[j])){
         d[j] = 1e-6
       }
@@ -299,7 +301,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   z_dist <- list()
   lambda_dist <- list()
   cat("MCMC Iteration: \n")
-  pb = txtProgressBar(min = 1, max = burnin+ngibbs, initial = 1, style = 3, width = 60)
+  pb = utils::txtProgressBar(min = 1, max = burnin+ngibbs, initial = 1, style = 3, width = 60)
   for(i in 1:(burnin+ngibbs)){
 
     if(i <= burnin){
@@ -330,7 +332,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
       z_dist[[i]] <- temp$ugom_z
       lambda_dist[[i]] <- ugom_L
     }
-    setTxtProgressBar(pb,i)
+    utils::setTxtProgressBar(pb,i)
   }
 
 
@@ -344,16 +346,17 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   #	  end
 
   #	  mata:
+
   lmeans <- Lambda/ngibbs
   n <- sapply(dados, dplyr::n_distinct)
   lmeans <- as.data.frame(lmeans)
   lmeans$groups = rep(names(n), times = n)
   lmeans <- lmeans %>%
-    dplyr::group_by(groups) %>%
-    dplyr::transmute(K1 = V1/sum(V1),
-                     K2 = V2/sum(V2)) %>%
+    dplyr::group_by(.data$groups) %>%
+    dplyr::transmute(K1 = .data$V1/sum(.data$V1),
+                     K2 = .data$V2/sum(.data$V2)) %>%
     dplyr::ungroup() %>%
-    dplyr::select(-groups) %>%
+    dplyr::select(-.data$groups) %>%
     round(4)
   names <- vector()
   for(i in 1:length(n)){
@@ -365,8 +368,8 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   lmeans$prop <- sapply(dados_dummy, mean)
   lmeans$prop <- round(lmeans$prop, 4)
 
-  lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(K1/prop,4),
-                                     lmfr2 = round(K2/prop, 4))
+  lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(.data$K1/.data$prop,4),
+                                     lmfr2 = round(.data$K2/.data$prop, 4))
 
 
   return(list("gmeans" = gmeans/ngibbs, "lmeans" = lmeans, "zmeans" = zmeans/ngibbs, "a0" = a0, "Xi" = Xi, "alphas" = alphas, "Lambda_dist" = lambda_dist, "Gamma_dist" = g_dist, "z_dist" = z_dist))

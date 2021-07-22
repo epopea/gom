@@ -1,3 +1,7 @@
+Package: gom
+Title: Grade of Membership Models
+Version: 0.0.1
+Author: Jeferson Andrade [aut, cre]
 Maintainer: Jeferson Andrade <jeferson@epopea.com.br>
 Description: For instance this package only have one functin with the Grade of Membership
     Model estimated by maximum likelihood methods.
@@ -9,5 +13,10 @@ Imports:
   inline,
   methods,
   stats,
-  utils
+  utils,
+  magrittr, 
+  fastDummies,
+  dplyr,
+  tibble,
+  rlang
 RoxygenNote: 7.1.1
