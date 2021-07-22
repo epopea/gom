@@ -68,7 +68,7 @@ with the initial and final pure type probabilities and some summary statistics. 
 the results for each number of pure types specified by the user, each of them with following components:
 
 \describe{
-  \item{Gik}{A data frame with the grades of membership of each ordered unique pattern of the given data.}
+  \item{Data}{A data frame with the previous data given by the user and the gamma estimated to each observation.}
   \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
   \item{Likelihood}{The maximum log-likelihood achieved by the model.}
   \item{AIC}{The Akaike Information Criterion.}

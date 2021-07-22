@@ -29,7 +29,7 @@
 #' the results for each number of pure types specified by the user, each of them with following components:
 #'
 #' \describe{
-#'   \item{Gik}{A data frame with the grades of membership of each ordered unique pattern of the given data.}
+#'   \item{Data}{A data frame with the previous data given by the user and the gamma estimated to each observation.}
 #'   \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
 #'   \item{Likelihood}{The maximum log-likelihood achieved by the model.}
 #'   \item{AIC}{The Akaike Information Criterion.}
@@ -1502,7 +1502,18 @@ gom_ml <- function (data.object = NULL,
       FG <- FG[, v.order]
     }
     names(FG) <- c(paste("gik", 1:initial.K, sep = ""))
-    FINAL.PARAMETERS[[paste0("K", initial.K)]]$Gik <- FG
+    data.object
+    data.object$place <- row.names(data.object)
+    aux <- data.frame(patterns = do.call(paste0, c(as.list(data.object[, internal.var]))),
+                      rows = 1:nrow(data.object))
+    aux <- aux %>% dplyr::arrange(patterns)
+    data.object <- data.object[aux$rows,]
+    data.object$patterns <- aux$patterns
+    FG$patterns = sort(unique(aux$patterns))
+    data.object <- inner_join(data.object,
+                        FG, by = "patterns")
+
+    FINAL.PARAMETERS[[paste0("K", initial.K)]]$Data <- data.object
     FP <- FP[-1, -1, -1]
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$Pkjl <- FP
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$Likelihood <- loglik[2] #adicionei o AIC a partir daqui
