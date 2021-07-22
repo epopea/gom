@@ -1506,11 +1506,11 @@ gom_ml <- function (data.object = NULL,
     data.object$place <- row.names(data.object)
     aux <- data.frame(patterns = do.call(paste0, c(as.list(data.object[, internal.var]))),
                       rows = 1:nrow(data.object))
-    aux <- aux %>% dplyr::arrange(patterns)
+    aux <- aux %>% dplyr::arrange(.data$patterns)
     data.object <- data.object[aux$rows,]
     data.object$patterns <- aux$patterns
     FG$patterns = sort(unique(aux$patterns))
-    data.object <- inner_join(data.object,
+    data.object <- dplyr::inner_join(data.object,
                         FG, by = "patterns")
 
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$Data <- data.object
