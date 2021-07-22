@@ -817,6 +817,8 @@ gom_ml <- function (data.object = NULL,
   #####################BEGIN cell.data function#
   cell.data <- function (data.object, case.weight, internal.var, omega.fit) {
     cell <- data.frame(lapply(data.object[, internal.var], as.factor))
+    cell <- data.frame(lapply(cell[, internal.var], as.numeric))
+    cell <- data.frame(lapply(cell[, internal.var], as.factor))
     if (!is.na(case.weight)) {
       cell[c(case.weight)] <- data.frame(sapply(data.object[, case.weight], as.numeric))
     }
