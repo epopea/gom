@@ -70,8 +70,9 @@ the results for each number of pure types specified by the user, each of them wi
 \describe{
   \item{Gik}{A data frame with the grades of membership of each ordered unique pattern of the given data.}
   \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
-  \item{Likelihood}{The maximum log-likelihood achieved by the model}
-  \item{AIC}{The Akaike Information Criterion}
+  \item{Likelihood}{The maximum log-likelihood achieved by the model.}
+  \item{AIC}{The Akaike Information Criterion.}
+  \item{Table}{A table with the lambda results organized by variables and their categories.}
 }
 }
 \description{

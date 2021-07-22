@@ -31,8 +31,9 @@
 #' \describe{
 #'   \item{Gik}{A data frame with the grades of membership of each ordered unique pattern of the given data.}
 #'   \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
-#'   \item{Likelihood}{The maximum log-likelihood achieved by the model}
-#'   \item{AIC}{The Akaike Information Criterion}
+#'   \item{Likelihood}{The maximum log-likelihood achieved by the model.}
+#'   \item{AIC}{The Akaike Information Criterion.}
+#'   \item{Table}{A table with the lambda results organized by variables and their categories.}
 #' }
 #' @export
 gom_ml <- function (data.object = NULL,
@@ -1268,61 +1269,65 @@ gom_ml <- function (data.object = NULL,
     cat(paste("\n\nLatter Log-Likelihood is:       \t", format(round(loglik[2], 4), nsmall = 4, decimal.mark = dec.char) , "\n", sep = "", collapse = NULL))
     cat(paste("\n\nAkaike Information Criterion:   \t", format(round(AIC, 4), nsmall = 4, decimal.mark = dec.char) , "\n", sep = "", collapse = NULL))
     cat(paste("\n\nLambda-Marginal Frequency Ratio (LMFR):\n", sep = "", collapse = NULL))
-    for (j in 2:length(ljlevels)) {
-      if (omega.fit == FALSE) {
-        if (!is.na(case.weight)) {
-          n <- stats::xtabs(data.object[, case.weight] ~ data.object[, internal.var[(j - 1)]], data.object)
-        } else {
-          aux <- internal.var[(j-1)]
-          n <- table(data.object[, aux])
-        }
-      } else {
-        n <- stats::xtabs(cell[-1, "Freq"] ~ cell[-1, internal.var[(j - 1)]], cell)
-      }
-      p <- prop.table(n)
-      for (l in l.levels.j[[j]]) {
-        if (l == (min(l.levels.j[[j]]))) {
-          if (j == 2) {
-            t <- do.call(paste, as.list(rep("", charnamevar)))
-            cat(paste(t, "\t", "   ", "\tn\t%", sep = "", collapse = NULL))
-            for (k in 2:(initial.K + 1)) {
-              cat(paste("\tk", (k - 1), "    ", sep = "", collapse = NULL))
-            }
-            for (k in 2:(initial.K + 1)) {
-              cat(paste("\tk", (k - 1), "/%lj", sep = "", collapse = NULL))
-            }
-            cat(paste("\n", sep = "", collapse = NULL))
+    table <- utils::capture.output({
+      for (j in 2:length(ljlevels)) {
+        if (omega.fit == FALSE) {
+          if (!is.na(case.weight)) {
+            n <- stats::xtabs(data.object[, case.weight] ~ data.object[, internal.var[(j - 1)]], data.object)
+          } else {
+            aux <- internal.var[(j-1)]
+            n <- table(data.object[, aux])
           }
-          t <- do.call(paste, as.list(rep("", (charnamevar - (nchar(internal.var[(j - 1)]))))))
-          cat(paste(internal.var[(j - 1)], t, sep = "", collapse = NULL))
-          cat(paste("\t", "l", l, "\t", sep = "", collapse = NULL))
         } else {
-          t <- do.call(paste, as.list(rep("", charnamevar)))
-          cat(paste(t, " \t", "l", l, "\t", sep = "", collapse = NULL))
+          n <- stats::xtabs(cell[-1, "Freq"] ~ cell[-1, internal.var[(j - 1)]], cell)
         }
-        if ((p[[l]] * 100) < 10) {
-          cat(paste(format(n[[l]], nsmall = 0, decimal.mark = dec.char), "\t", "0", format(round((p[[l]] * 100), 3), nsmall = 3, decimal.mark = dec.char), sep = "", collapse = NULL))
-        } else {
-          cat(paste(format(n[[l]], nsmall = 0, decimal.mark = dec.char), "\t", format(round((p[[l]] * 100), 3), nsmall = 3, decimal.mark = dec.char), sep = "", collapse = NULL))
+        p <- prop.table(n)
+        for (l in l.levels.j[[j]]) {
+          if (l == (min(l.levels.j[[j]]))) {
+            if (j == 2) {
+              t <- do.call(paste, as.list(rep("", charnamevar)))
+              cat(paste(t, "\t", "   ", "\tn\t%", sep = "", collapse = NULL))
+              for (k in 2:(initial.K + 1)) {
+                cat(paste("\tk", (k - 1), "    ", sep = "", collapse = NULL))
+              }
+              for (k in 2:(initial.K + 1)) {
+                cat(paste("\tk", (k - 1), "/%lj", sep = "", collapse = NULL))
+              }
+              cat(paste("\n", sep = "", collapse = NULL))
+            }
+            t <- do.call(paste, as.list(rep("", (charnamevar - (nchar(internal.var[(j - 1)]))))))
+            cat(paste(internal.var[(j - 1)], t, sep = "", collapse = NULL))
+            cat(paste("\t", "l", l, "\t", sep = "", collapse = NULL))
+          } else {
+            t <- do.call(paste, as.list(rep("", charnamevar)))
+            cat(paste(t, " \t", "l", l, "\t", sep = "", collapse = NULL))
+          }
+          if ((p[[l]] * 100) < 10) {
+            cat(paste(format(n[[l]], nsmall = 0, decimal.mark = dec.char), "\t", "0", format(round((p[[l]] * 100), 3), nsmall = 3, decimal.mark = dec.char), sep = "", collapse = NULL))
+          } else {
+            cat(paste(format(n[[l]], nsmall = 0, decimal.mark = dec.char), "\t", format(round((p[[l]] * 100), 3), nsmall = 3, decimal.mark = dec.char), sep = "", collapse = NULL))
+          }
+          for (k in 2:(initial.K + 1)) {
+            cat(paste("\t", format(round(FP[k, j, (l + 1)], 4), nsmall = 4, decimal.mark = dec.char), sep = "", collapse = NULL))
+          }
+          for (k in 2:(initial.K + 1)) {
+            cat(paste("\t", format(round((FP[k, j, (l + 1)] / p[[l]]), 4), nsmall = 4, decimal.mark = dec.char), sep = "", collapse = NULL))
+          }
+          cat(paste("\n", sep = "", collapse = NULL))
         }
-        for (k in 2:(initial.K + 1)) {
-          cat(paste("\t", format(round(FP[k, j, (l + 1)], 4), nsmall = 4, decimal.mark = dec.char), sep = "", collapse = NULL))
+        if (j != length(ljlevels)) {
+          cat(paste("\n", sep = "", collapse = NULL))
         }
-        for (k in 2:(initial.K + 1)) {
-          cat(paste("\t", format(round((FP[k, j, (l + 1)] / p[[l]]), 4), nsmall = 4, decimal.mark = dec.char), sep = "", collapse = NULL))
-        }
-        cat(paste("\n", sep = "", collapse = NULL))
       }
-      if (j != length(ljlevels)) {
-        cat(paste("\n", sep = "", collapse = NULL))
-      }
-    }
+    })
+    writeLines(table)
     sink()
     if (is.null(v.order)) {
       cat(paste("\n*Note: Could not organize pure type probabilities with a confidence interval of 99.0%.\n", sep = "", collapse = NULL))
     }
     cat(paste("\n*Note: Saved frequency table, pure type probabilities and loglikelihood values to ", output, ".\n", sep = "", collapse = NULL))
     cat(paste("\n*Note: Saved original data with GoM scores to " , getwd(), "/GoMK", initial.K, "(", nf, ")", ".TXT", ".\n", sep = "", collapse = NULL))
+    return(table)
   }
   #####################END loggom function#
 
@@ -1481,7 +1486,7 @@ gom_ml <- function (data.object = NULL,
                      initial.K, cell, ljlevels, l.levels.j,
                      order.K, v.order, IG, FG,
                      omega.fit, dec.char)
-    loggom(case.id,
+    table <- loggom(case.id,
            case.weight,
            data.object,
            internal.var,
@@ -1507,6 +1512,7 @@ gom_ml <- function (data.object = NULL,
     }
     AIC <- ((2 * ((initial.K * LJ) + (initial.K * (sum(cell$Freq, na.rm = TRUE))))) - (2 * loglik[2]))
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$AIC <- AIC
+    FINAL.PARAMETERS[[paste0("K", initial.K)]]$Table <- table
   }
   options(scipen = default.scipen[[1]])
   options(digits = default.digits[[1]])
