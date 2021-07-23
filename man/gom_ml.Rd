@@ -26,11 +26,11 @@ gom_ml(
 )
 }
 \arguments{
-\item{data.object}{A data frame of data or an object that can be coerced to a data frame.}
+\item{data.object}{A data frame or an object that can be coerced to a data frame.}
 
-\item{initial.K}{An integer indicating the initial number of pure type probabilities to be estimated.}
+\item{initial.K}{An integer indicating the initial number of the set of pure type probabilities to be estimated.}
 
-\item{final.K}{An integer indicating the last number of pure type probabilities to be estimated.}
+\item{final.K}{An integer indicating the largest number of the set of pure type probabilities to be estimated.}
 
 \item{gamma.algorithm}{A character that specifies the algorithm to be used to estimate the gamma values.}
 
@@ -48,9 +48,9 @@ gom_ml(
 
 \item{lambda.fit}{A logical value indicating if the lambda values need to be estimated.}
 
-\item{case.id}{A character with the name of the variable with the ID of each observation.}
+\item{case.id}{A character with the name of the variable with each observation ID.}
 
-\item{case.weight}{A character with the name of the variable with the weight of each observation.}
+\item{case.weight}{A character with the name of the variable which contains the weight for each observation.}
 
 \item{internal.var}{A character vector with the name of the variables to be used by the model.}
 
@@ -60,23 +60,22 @@ gom_ml(
 
 \item{dec.char}{A character with the decimal symbol to be used in the output files.}
 
-\item{MC_iter}{The number of iterations to be used within the Monte Carlo Estimation.}
+\item{MC_iter}{The number of iterations to be used within the Monte Carlo Simulation.}
 }
 \value{
-gom_ml saves two files, one containing a table with unique data used by the model with the grades of membership, and another
-with the initial and final pure type probabilities and some summary statistics. The gom_ml function also returns a list with information about
-the results for each number of pure types specified by the user, each of them with following components:
+gom_ml saves two files, one containing a table with unique data configuration along with the grades of membership, and another file
+with the initial and final pure type probabilities along with some summary statistics. The gom_ml function also returns a list with the following components:
 
 \describe{
-  \item{Data}{A data frame with the previous data given by the user and the gamma estimated to each observation.}
-  \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
+  \item{Data}{A data frame with the original data given by the user and the gamma for each observation.}
+  \item{Pkjl}{An array with the pure type probabilities. The array dimensions equal the number of extreme profiles, variables and categories, respectively.}
   \item{Likelihood}{The maximum log-likelihood achieved by the model.}
   \item{AIC}{The Akaike Information Criterion.}
-  \item{Table}{A table with the lambda results organized by variables and their categories.}
+  \item{Table}{A table with the posterior lambdas organized by variables and their categories.}
 }
 }
 \description{
-This function takes a data object and creates a fixed, small set of pure types, each characterized
+This function takes a data object and creates a fixed, small set of extreme profiles, each characterized
 by the probabilities of answering a category of each question, along with a set of scores (or grades
-of membership) that measure each subject’s degree of similarity to each pure type.
+of membership) that measures each subject’s degree of similarity to each extreme profile (reference group).
 }

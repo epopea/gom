@@ -1,23 +1,28 @@
-#' Title
+#' Bayesian Grade of Membership Mixture Model
 #'
-#' @param dados A data frame with the categorical variables to be used be the model.
+#' This function takes a data object and creates a joint posterior distribution of pure type probabilities, which
+#' characterize a small set of extreme profiles, along with the posterior distribution of the grade of membership
+#' estimates and the posterior distribution of the Dirichlet distribution hyperparameters.
+#'
+#' @param data A data frame with the categorical variables to be used be the model.
 #' @param ntypes An integer indicating the number of pure type probabilities to be estimated.
-#' @param alpha An array with the pure type probabilities. If specified the model will not try to estimate alpha and will only use the array that was provided by the user.
-#' @param burnin Number of iterations to be made until the markov chain achieves a stationary distribution
-#' @param ngibbs Number of iterations to be made after the markov chain achieves a stationary distribution
+#' @param alpha An array with the pure type probabilities. If specified, the model will not estimate
+#' alpha and will only use the array provided by user.
+#' @param burnin Number of iterations for the Markov chain achieve a stationary distribution.
+#' @param ngibbs Number of iterations after the Markov chain achieved a stationary distribution.
 #' @param omega The tuning parameter for the Metropolis–Hastings step.
 #' @param eta The tuning parameter of the conditional Dirichlet distribution of Xi.
-#' @param tau The shape parameter of the prior Gamma distribution of alpha.
-#' @param beta The inverse scale parameter of the prior Gamma distribution of alpha.
-#' @param gomscores Prefix of the gamma column names.
+#' @param tau The shape parameter of the prior Gamma distribution for alpha.
+#' @param beta The inverse scale parameter of the prior Gamma distribution for alpha.
+#' @param gomscores Prefix for the gamma column names.
 #'
-#' @return A list with the posterior distribution of gamma, lambda, Xi and a latent variable z
+#' @return A list with the posterior distributions of gamma, lambda, Xi, and a latent variable z.
 #'
 #' @importFrom  rlang .data
 #' @export
-gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000,
+gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000,
                       omega = 50, eta = 10, tau = 2, beta = 2, gomscores = "g"){
-  dados_dummy <- fastDummies::dummy_cols(dados, select_columns = names(dados), remove_selected_columns = TRUE)
+  data_dummy <- fastDummies::dummy_cols(data, select_columns = names(data), remove_selected_columns = TRUE)
 
   # Are known Dirichlet parameters supplied?
 
@@ -195,9 +200,9 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
     return(ugom_alpha)
   }
 
-  setup <- function(dados, ntypes, alpha){
-    ugom_X <- as.matrix(dados)
-    ugom_g <- matrix(1/ntypes, nrow = nrow(dados), ncol = ntypes)
+  setup <- function(data, ntypes, alpha){
+    ugom_X <- as.matrix(data)
+    ugom_g <- matrix(1/ntypes, nrow = nrow(data), ncol = ntypes)
     if(exists("dknown")){
       ugom_alpha <- alpha
     } else{
@@ -239,14 +244,14 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   }
 
   #Process GoM Scores
-  tryCatch(gmeans <- as.data.frame(matrix(0, nrow = nrow(dados_dummy), ncol = ntypes)))
+  tryCatch(gmeans <- as.data.frame(matrix(0, nrow = nrow(data_dummy), ncol = ntypes)))
   if(gomscores != ""){
     nsc <- length(gomscores)
     if(nsc < 1){
       stop("gomscores(): one stub name required")
     }
     for(i in 1:ntypes){
-      #gmeans[[paste0(gomscores, "_", i)]] <- rep(0, nrow(dados))
+      #gmeans[[paste0(gomscores, "_", i)]] <- rep(0, nrow(data))
       names(gmeans)[i] <- paste0(gomscores, "_", i)
     }
   }
@@ -265,9 +270,9 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   #    local nvars : word count `varlist'
   #    matrix `Lambda' = J(`nvars',`ntypes',0)
   #    matrix `Xi'' = J(1, `ntypes', 0)
-  nvars <- ncol(dados_dummy)
+  nvars <- ncol(data_dummy)
   Lambda <- matrix(0, nrow = nvars, ncol = ntypes)
-  zmeans <- matrix(0, nrow = nrow(dados_dummy), ncol = nvars)
+  zmeans <- matrix(0, nrow = nrow(data_dummy), ncol = nvars)
   Xi <- matrix(0, nrow = 1, ncol = ntypes)
 
   #// Form expression list for posting
@@ -290,7 +295,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
 
   #  // Initialize mata matrices
 
-  temp <- setup(dados_dummy, ntypes, alpha)
+  temp <- setup(data_dummy, ntypes, alpha)
   ugom_X <- temp$ugom_X
   ugom_g <- temp$ugom_g
   ugom_alpha <- temp$ugom_alpha
@@ -348,7 +353,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   #	  mata:
 
   lmeans <- Lambda/ngibbs
-  n <- sapply(dados, dplyr::n_distinct)
+  n <- sapply(data, dplyr::n_distinct)
   lmeans <- as.data.frame(lmeans)
   lmeans$groups = rep(names(n), times = n)
   lmeans <- lmeans %>%
@@ -365,7 +370,7 @@ gom_bayes <- function(dados, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 100
   lmeans$names <- names
 
   lmeans <- tibble::column_to_rownames(lmeans, "names")
-  lmeans$prop <- sapply(dados_dummy, mean)
+  lmeans$prop <- sapply(data_dummy, mean)
   lmeans$prop <- round(lmeans$prop, 4)
 
   lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(.data$K1/.data$prop,4),

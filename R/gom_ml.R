@@ -1,13 +1,13 @@
 #' Grade of Membership Mixture Model
 #'
-#' This function takes a data object and creates a fixed, small set of pure types, each characterized
+#' This function takes a data object and creates a fixed, small set of extreme profiles, each characterized
 #' by the probabilities of answering a category of each question, along with a set of scores (or grades
-#' of membership) that measure each subject’s degree of similarity to each pure type.
+#' of membership) that measures each subject’s degree of similarity to each extreme profile (reference group).
 #'
 #'
-#' @param data.object A data frame of data or an object that can be coerced to a data frame.
-#' @param initial.K An integer indicating the initial number of pure type probabilities to be estimated.
-#' @param final.K An integer indicating the last number of pure type probabilities to be estimated.
+#' @param data.object A data frame or an object that can be coerced to a data frame.
+#' @param initial.K An integer indicating the initial number of the set of pure type probabilities to be estimated.
+#' @param final.K An integer indicating the largest number of the set of pure type probabilities to be estimated.
 #' @param gamma.algorithm A character that specifies the algorithm to be used to estimate the gamma values.
 #' @param initial.gamma A character that specifies how the initial gamma values should be specified. If "gamma.object", then initial.gamma.object is needed.
 #' @param initial.gamma.object A data frame with the initial gamma values for each observation.
@@ -16,24 +16,23 @@
 #' @param initial.lambda A character that specifies how the initial lambda values should be specified. If "lambda.object", then initial.lambda.object is needed.
 #' @param initial.lambda.object An array with the initial lambda values for each category of each variable.
 #' @param lambda.fit A logical value indicating if the lambda values need to be estimated.
-#' @param case.id A character with the name of the variable with the ID of each observation.
-#' @param case.weight A character with the name of the variable with the weight of each observation.
+#' @param case.id A character with the name of the variable with each observation ID.
+#' @param case.weight A character with the name of the variable which contains the weight for each observation.
 #' @param internal.var A character vector with the name of the variables to be used by the model.
 #' @param order.K A logical value indicating if the lambdas should be organized with 99 percent confidence interval.
 #' @param omega.fit A logical value specifying if the model should generate missing patterns of the data before compiling.
 #' @param dec.char A character with the decimal symbol to be used in the output files.
-#' @param MC_iter The number of iterations to be used within the Monte Carlo Estimation.
+#' @param MC_iter The number of iterations to be used within the Monte Carlo Simulation.
 #'
-#' @return gom_ml saves two files, one containing a table with unique data used by the model with the grades of membership, and another
-#' with the initial and final pure type probabilities and some summary statistics. The gom_ml function also returns a list with information about
-#' the results for each number of pure types specified by the user, each of them with following components:
+#' @return gom_ml saves two files, one containing a table with unique data configuration along with the grades of membership, and another file
+#' with the initial and final pure type probabilities along with some summary statistics. The gom_ml function also returns a list with the following components:
 #'
 #' \describe{
-#'   \item{Data}{A data frame with the previous data given by the user and the gamma estimated to each observation.}
-#'   \item{Pkjl}{An array with dimensions equal to the number of pure types, variables and categories, respectively, with the pure type probabilities.}
+#'   \item{Data}{A data frame with the original data given by the user and the gamma for each observation.}
+#'   \item{Pkjl}{An array with the pure type probabilities. The array dimensions equal the number of extreme profiles, variables and categories, respectively.}
 #'   \item{Likelihood}{The maximum log-likelihood achieved by the model.}
 #'   \item{AIC}{The Akaike Information Criterion.}
-#'   \item{Table}{A table with the lambda results organized by variables and their categories.}
+#'   \item{Table}{A table with the posterior lambdas organized by variables and their categories.}
 #' }
 #' @export
 gom_ml <- function (data.object = NULL,

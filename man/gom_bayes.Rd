@@ -2,10 +2,10 @@
 % Please edit documentation in R/gom_bayes.R
 \name{gom_bayes}
 \alias{gom_bayes}
-\title{Title}
+\title{Bayesian Grade of Membership Mixture Model}
 \usage{
 gom_bayes(
-  dados,
+  data,
   ntypes = 2,
   alpha = "",
   burnin = 1000,
@@ -18,29 +18,32 @@ gom_bayes(
 )
 }
 \arguments{
-\item{dados}{A data frame with the categorical variables to be used be the model.}
+\item{data}{A data frame with the categorical variables to be used be the model.}
 
 \item{ntypes}{An integer indicating the number of pure type probabilities to be estimated.}
 
-\item{alpha}{An array with the pure type probabilities. If specified the model will not try to estimate alpha and will only use the array that was provided by the user.}
+\item{alpha}{An array with the pure type probabilities. If specified, the model will not estimate
+alpha and will only use the array provided by user.}
 
-\item{burnin}{Number of iterations to be made until the markov chain achieves a stationary distribution}
+\item{burnin}{Number of iterations for the Markov chain achieve a stationary distribution.}
 
-\item{ngibbs}{Number of iterations to be made after the markov chain achieves a stationary distribution}
+\item{ngibbs}{Number of iterations after the Markov chain achieved a stationary distribution.}
 
 \item{omega}{The tuning parameter for the Metropolis–Hastings step.}
 
 \item{eta}{The tuning parameter of the conditional Dirichlet distribution of Xi.}
 
-\item{tau}{The shape parameter of the prior Gamma distribution of alpha.}
+\item{tau}{The shape parameter of the prior Gamma distribution for alpha.}
 
-\item{beta}{The inverse scale parameter of the prior Gamma distribution of alpha.}
+\item{beta}{The inverse scale parameter of the prior Gamma distribution for alpha.}
 
-\item{gomscores}{Prefix of the gamma column names.}
+\item{gomscores}{Prefix for the gamma column names.}
 }
 \value{
-A list with the posterior distribution of gamma, lambda, Xi and a latent variable z
+A list with the posterior distributions of gamma, lambda, Xi, and a latent variable z.
 }
 \description{
-Title
+This function takes a data object and creates a joint posterior distribution of pure type probabilities, which
+characterize a small set of extreme profiles, along with the posterior distribution of the grade of membership
+estimates and the posterior distribution of the Dirichlet distribution hyperparameters.
 }
