@@ -37,22 +37,22 @@
 #' }
 #' @export
 gom_ml <- function (data.object = NULL,
-                     initial.K = 2, final.K = initial.K,
-                     gamma.algorithm = c("gradient.1992", "woodbury.1974"),
-                     initial.gamma = c("equal.values", "random", "pure1", "gamma.object"),
-                     initial.gamma.object = NULL,
-                     gamma.fit = TRUE,
-                     lambda.algorithm = c("gradient.1992", "woodbury.1974"),
-                     initial.lambda = c("random", "pure1", "equal.values", "lambda.object"),
-                     initial.lambda.object = NULL,
-                     lambda.fit = TRUE,
-                     case.id = NA,
-                     case.weight = NA,
-                     internal.var = NULL,
-                     order.K = TRUE,
-                     omega.fit = FALSE,
-                     dec.char = ".",
-                     MC_iter = 1000) {
+                    initial.K = 2, final.K = initial.K,
+                    gamma.algorithm = c("gradient.1992", "woodbury.1974"),
+                    initial.gamma = c("equal.values", "random", "pure1", "gamma.object"),
+                    initial.gamma.object = NULL,
+                    gamma.fit = TRUE,
+                    lambda.algorithm = c("gradient.1992", "woodbury.1974"),
+                    initial.lambda = c("random", "pure1", "equal.values", "lambda.object"),
+                    initial.lambda.object = NULL,
+                    lambda.fit = TRUE,
+                    case.id = NA,
+                    case.weight = NA,
+                    internal.var = NULL,
+                    order.K = TRUE,
+                    omega.fit = FALSE,
+                    dec.char = ".",
+                    MC_iter = 1000) {
 
   data.object <- as.data.frame(data.object)
 
@@ -1187,7 +1187,7 @@ gom_ml <- function (data.object = NULL,
     } else if (omega.fit == FALSE) {
       cat(paste("\n\n*Note ", (nrow(cell) - 1), " unique data patterns (I) has found in data object.\n", sep = "", collapse = NULL))
     }
-    charnamevar <- max(sapply(internal.var, nchar))
+    charnamevar <- max(sapply(internal.var, nchar)) + 1
     cat(paste("\n\nFrequency Table Original Data:\n", sep = "", collapse = NULL))
     for (j in 1:(length(ljlevels) - 1)) {
       if (!is.na(case.weight)) {
@@ -1435,8 +1435,8 @@ gom_ml <- function (data.object = NULL,
       IG_list[[i]] <- IG
 
       invisible(utils::capture.output(loglik[[i]] <- GoM_Model(baselevel, ljlevels, cell,
-                                                        gamma.algorithm, FG, gamma.fit,
-                                                        lambda.algorithm, FP, lambda.fit, FITP)))
+                                                               gamma.algorithm, FG, gamma.fit,
+                                                               lambda.algorithm, FP, lambda.fit, FITP)))
 
       utils::setTxtProgressBar(pb,i)
 
@@ -1487,14 +1487,14 @@ gom_ml <- function (data.object = NULL,
                      order.K, v.order, IG, FG,
                      omega.fit, dec.char)
     table <- loggom(case.id,
-           case.weight,
-           data.object,
-           internal.var,
-           initial.K, final.K,
-           initial.gamma, initial.lambda,
-           gamma.algorithm, lambda.algorithm,
-           gamma.fit, lambda.fit, order.K, omega.fit,
-           cell, ljlevels, l.levels.j, IP, FP, loglik, nf, dec.char, v.order)
+                    case.weight,
+                    data.object,
+                    internal.var,
+                    initial.K, final.K,
+                    initial.gamma, initial.lambda,
+                    gamma.algorithm, lambda.algorithm,
+                    gamma.fit, lambda.fit, order.K, omega.fit,
+                    cell, ljlevels, l.levels.j, IP, FP, loglik, nf, dec.char, v.order)
     setwd(pathfolder)
     FG <- FG[-1, -1]
     row.names(FG) <- NULL
@@ -1511,7 +1511,8 @@ gom_ml <- function (data.object = NULL,
     data.object$patterns <- aux$patterns
     FG$patterns = sort(unique(aux$patterns))
     data.object <- dplyr::inner_join(data.object,
-                        FG, by = "patterns")
+                                     FG, by = "patterns")
+    data.object <- data.object %>% dplyr::select(-.data$place, -.data$patterns)
 
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$Data <- data.object
     FP <- FP[-1, -1, -1]
@@ -1540,5 +1541,4 @@ gom_ml <- function (data.object = NULL,
 #'                    Id = 1:500)
 #' gom_ml(data.object = data, case.id = "Id", initial.lambda = "random")
 #' }
-
 
