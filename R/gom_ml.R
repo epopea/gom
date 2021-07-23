@@ -54,7 +54,6 @@ gom_ml <- function (data.object = NULL,
                     MC_iter = 1000) {
 
   data.object <- as.data.frame(data.object)
-  data.aux <- data.object
 
   GoM <- '
     using namespace std;
@@ -1369,6 +1368,7 @@ gom_ml <- function (data.object = NULL,
   options(digits = 15)
   FINAL.PARAMETERS <- vector("list")
   for (initial.K in initial.K:final.K) {
+    data.aux = data.object
     verify.parameters(case.id,
                       case.weight,
                       data.object,
