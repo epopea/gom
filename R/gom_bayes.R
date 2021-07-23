@@ -306,7 +306,7 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
   z_dist <- list()
   lambda_dist <- list()
   cat("MCMC Iteration: \n")
-  pb = utils::txtProgressBar(min = 1, max = burnin+ngibbs, initial = 1, style = 3, width = 60)
+  pb = utils::txtProgressBar(min = 0, max = burnin+ngibbs, initial = 0, style = 3, width = 60)
   for(i in 1:(burnin+ngibbs)){
 
     if(i <= burnin){
