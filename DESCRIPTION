@@ -1,10 +1,13 @@
 Package: gom
-Title: Grade of Membership Models
+Title: Grade of Membership Mixture Models
 Version: 0.0.1
-Author: Jeferson Andrade [aut, cre]
+Authors@R: c(
+    person("Jeferson", "Andrade", role = c("aut", "cre"), email = "jeferson@epopea.com.br", comment = c(ORCID = "0000-0002-0731-3427")),
+    person("Gilvan", "Guedes", role = "aut", email = "gilvan@epopea.com.br", comment = c(ORCID = "0000-0001-8231-238X")),
+    person("Julimar", "Pinto", role = "ctb"),
+    person("Andre", "Caetano", role = "ctb"))
 Maintainer: Jeferson Andrade <jeferson@epopea.com.br>
-Description: For instance this package only have one functin with the Grade of Membership
-    Model estimated by maximum likelihood methods.
+Description: This package implements the cross-sectional version of the grade of membership mixture model in two different estimation methods: Maximum likelyhood and Bayesian.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
