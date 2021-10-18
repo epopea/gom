@@ -64,7 +64,7 @@ gom_ml(
 }
 \value{
 gom_ml saves two files, one containing a table with unique data configuration along with the grades of membership, and another file
-with the initial and final pure type probabilities along with some summary statistics. The gom_ml function also returns a list with the following components:
+with the initial and final pure type probabilities along with some summary statistics. The gom_ml function also returns an object of class \emph{gom_ml} with the following components:
 
 \describe{
   \item{Data}{A data frame with the original data given by the user and the gamma for each observation.}
@@ -78,4 +78,15 @@ with the initial and final pure type probabilities along with some summary stati
 This function takes a data object and creates a fixed, small set of extreme profiles, each characterized
 by the probabilities of answering a category of each question, along with a set of scores (or grades
 of membership) that measures each subject’s degree of similarity to each extreme profile (reference group).
+}
+\examples{
+\dontrun{
+data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
+                   x2 = round(stats::runif(n = 500, 1, 3), 0),
+                   x3 = round(stats::runif(n = 500, 1, 4), 0),
+                   x4 = round(stats::runif(n = 500, 1, 5), 0),
+                   Id = 1:500)
+
+gom_ml(data.object = data, case.id = "Id", initial.lambda = "random")
+}
 }

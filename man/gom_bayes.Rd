@@ -8,8 +8,8 @@ gom_bayes(
   data,
   ntypes = 2,
   alpha = "",
-  burnin = 1000,
-  ngibbs = 1000,
+  burnin = 250,
+  ngibbs = 250,
   omega = 50,
   eta = 10,
   tau = 2,
@@ -40,10 +40,20 @@ alpha and will only use the array provided by user.}
 \item{gomscores}{Prefix for the gamma column names.}
 }
 \value{
-A list with the posterior distributions of gamma, lambda, Xi, and a latent variable z.
+An object of class \emph{gom_bayes} with the posterior distributions of gamma, lambda, Xi, and alpha.
 }
 \description{
 This function takes a data object and creates a joint posterior distribution of pure type probabilities, which
 characterize a small set of extreme profiles, along with the posterior distribution of the grade of membership
 estimates and the posterior distribution of the Dirichlet distribution hyperparameters.
+}
+\examples{
+\dontrun{
+data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
+                   x2 = round(stats::runif(n = 500, 1, 3), 0),
+                   x3 = round(stats::runif(n = 500, 1, 4), 0),
+                   x4 = round(stats::runif(n = 500, 1, 5), 0))
+
+gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
+}
 }

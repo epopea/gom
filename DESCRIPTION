@@ -7,10 +7,10 @@ Authors@R: c(
     person("Julimar", "Pinto", role = "ctb"),
     person("Andre", "Caetano", role = "ctb"))
 Maintainer: Jeferson Andrade <jeferson@epopea.com.br>
-Description: This package implements the cross-sectional version of the grade of membership mixture model in two different estimation methods: Maximum likelyhood and Bayesian.
+Description: Implements the cross-sectional version of the grade of membership mixture model in two different estimation methods: Maximum likelihood and Bayesian.
 License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 Imports:
   Rcpp,
   inline,

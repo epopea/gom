@@ -16,17 +16,27 @@
 #' @param beta The inverse scale parameter of the prior Gamma distribution for alpha.
 #' @param gomscores Prefix for the gamma column names.
 #'
-#' @return A list with the posterior distributions of gamma, lambda, Xi, and a latent variable z.
+#' @return An object of class \emph{gom_bayes} with the posterior distributions of gamma, lambda, Xi, and alpha.
 #'
 #' @importFrom  rlang .data
 #' @export
-gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000,
+#' @examples
+#' \dontrun{
+#' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
+#'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
+#'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
+#'                    x4 = round(stats::runif(n = 500, 1, 5), 0))
+#'
+#' gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
+#' }
+gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
                       omega = 50, eta = 10, tau = 2, beta = 2, gomscores = "g"){
+
   data_dummy <- fastDummies::dummy_cols(data, select_columns = names(data), remove_selected_columns = TRUE)
 
   # Are known Dirichlet parameters supplied?
 
-  ugom_gibbs_iter <- function(postg, ugom_X, ugom_alpha, ugom_L, ugom_g, gmeans, zmeans, Lambda, omega, eta, tau, beta){
+  ugom_gibbs_iter <- function(postg, ugom_X, ugom_alpha, ugom_L, ugom_g, gmeans, Lambda, omega, eta, tau, beta){
 
     n = nrow(ugom_X)
     K = ncol(ugom_g)
@@ -62,68 +72,41 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
       for(k in 1:K){
         a = 1 + sum((ugom_X[, j] != 0) * (ugom_z[, j] == k))
         b = 1 + sum((ugom_X[, j] == 0) * (ugom_z[, j] == k))
-        ugom_L[j, k] = stats::qbeta(stats::runif(1), shape1 = a, shape2 = b) ### Lembrar de baixar pacote com a função pinvbeta
+        ugom_L[j, k] = stats::qbeta(stats::runif(1), shape1 = a, shape2 = b)
       }
+      ugom_L[j, ] <- ugom_L[j, ]/sum(ugom_L[j, ])
     }
+
     newalpha = matrix(0, nrow = 1, ncol = K)
     for(i in 1:n){
       for(k in 1:K){
         newalpha[1, k] = ugom_alpha[k] + sum(ugom_z[i,] == k)
       }
-      ugom_g[i, ] <- randomdirichlet(newalpha) ### Buscar função de distribuição dirichlet
+      ugom_g[i, ] <- randomdirichlet(newalpha) # Buscar função de distribuição dirichlet
     }
 
-    #// Update alpha
+    # Update alpha
 
     if(exists("dknown") == F) {
       ugom_alpha <- ugom_update_alpha(ugom_alpha, ugom_X, ugom_g, omega, eta, tau, beta)
     }
 
-    #// Store L back as Lambda in Stata
-
-    #st_matrix(st_local("Lambda"), ugom_L)
-
-    #// Store a0 and xi back in Stata
-
     a0 = sum(ugom_alpha)
-    e = ugom_alpha / a0
-
-    #st_numscalar(st_local("a0"), a0)
-    #st_matrix(st_local("Xi"), e)
-
-    Xi <- e
-
-    #// Process GoM-score variables, if need be
-
-    #if(postg) {
-    #  glist = tokens(st_local("gmeans"))
-    #  for(k=1; k<=cols(glist); k++) {
-    #    gvar = st_data(., glist[k], st_local("touse"))
-    #    gvar = gvar + ugom_g[.,k]
-    #    st_store(., glist[k], st_local("touse"), gvar)
-    #  }
-    #}
+    Xi <- ugom_alpha / a0
 
     if(postg){
-      glist = gmeans
-      llist = Lambda
-      zlist = zmeans
-      for(k in 1:ncol(glist)){
-        gvar = glist[, k]
+      for(k in 1:ncol(gmeans)){
+        gvar = gmeans[, k]
         gvar = gvar + ugom_g[, k]
         gmeans[ ,k] = gvar
-        lvar = llist[, k]
+        lvar = Lambda[, k]
         lvar = lvar + ugom_L[, k]
         Lambda[, k] = lvar
       }
-      for(j in 1:nvars){
-        zvar = zlist[, j]
-        zvar = zvar + ugom_z[, j]
-        zmeans[, j] = zvar
-      }
-      return(list("Lambda" = Lambda, "a0" = a0, "Xi" = Xi, "gmeans" = gmeans, "ugom_X" = ugom_X, "ugom_alpha" = ugom_alpha, "ugom_L" = ugom_L, "ugom_g" = ugom_g, "zmeans" = zmeans, "ugom_z" = ugom_z))
+
+      return(list("Lambda" = Lambda, "a0" = a0, "Xi" = Xi, "gmeans" = gmeans, "ugom_alpha" = ugom_alpha, "ugom_L" = ugom_L, "ugom_g" = ugom_g))
     }
-    return(list("a0" = a0, "Xi" = Xi, "ugom_X" = ugom_X, "ugom_alpha" = ugom_alpha, "ugom_L" = ugom_L, "ugom_g" = ugom_g, "ugom_z" = ugom_z))
+    return(list("a0" = a0, "Xi" = Xi, "ugom_alpha" = ugom_alpha, "ugom_L" = ugom_L, "ugom_g" = ugom_g))
   }
 
   ugom_update_alpha <- function(ugom_alpha, ugom_X, ugom_g, omega, eta, tau, beta){
@@ -132,13 +115,6 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
 
     K = length(ugom_alpha)
     N = nrow(ugom_X)
-
-    # Get omega and eta, etc. from Stata
-
-    #omega = strtoreal(st_local("omega"))
-    #eta = strtoreal(st_local("eta"))
-    #tau = strtoreal(st_local("tau"))
-    #beta = strtoreal(st_local("beta"))
 
     # Draw candidate point for a0
 
@@ -185,7 +161,7 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
 
     # Update if necessary
 
-    if(stats::runif(1) < re0) {
+    if(is.nan(re0) && stats::runif(1) < re0) {
       xi = xistar
       change = 1
     }
@@ -200,31 +176,22 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
     return(ugom_alpha)
   }
 
-  setup <- function(data, ntypes, alpha){
-    ugom_X <- as.matrix(data)
-    ugom_g <- matrix(1/ntypes, nrow = nrow(data), ncol = ntypes)
-    if(exists("dknown")){
-      ugom_alpha <- alpha
-    } else{
-      ugom_alpha <- matrix(0.25, nrow = 1, ncol = ntypes)
-    }
-    ugom_L <- matrix(stats::runif(ntypes*ncol(ugom_X)), nrow = ncol(ugom_X), ncol = ntypes)
-    #ugom_L <- matrix(c(.9472316166,   .0522233748,
-    #                   .9743182755,   .9457483679,
-    #                   .1856478315,   .9487333737,
-    #                   .8825376215,   .9440776079,
-    #                   .0894258515,   .7505444902,
-    #                   .9484983174,   .1121626508), nrow = 6, ncol = 2, byrow = T)
+  ugom_X <- as.matrix(data_dummy)
 
-    return(list("ugom_X" = ugom_X, "ugom_g" = ugom_g, "ugom_alpha" = ugom_alpha, "ugom_L" = ugom_L))
-
+  ugom_g <- matrix(1/ntypes, nrow = nrow(data_dummy), ncol = ntypes)
+  if(exists("dknown")){
+    ugom_alpha <- alpha
+  } else{
+    ugom_alpha <- matrix(0.25, nrow = 1, ncol = ntypes)
   }
+
+  ugom_L <- matrix(stats::runif(ntypes*ncol(ugom_X)), nrow = ncol(ugom_X), ncol = ntypes)
 
   randomdirichlet <- function(alpha){
     d <- vector(length = length(alpha))
     for(j in 1:length(alpha)){
       d[j] = stats::qgamma(shape = alpha[j], p=stats::runif(1))
-      if(is.null(d[j])){
+      if(is.nan(d[j])){
         d[j] = 1e-6
       }
     }
@@ -251,106 +218,52 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
       stop("gomscores(): one stub name required")
     }
     for(i in 1:ntypes){
-      #gmeans[[paste0(gomscores, "_", i)]] <- rep(0, nrow(data))
       names(gmeans)[i] <- paste0(gomscores, "_", i)
     }
   }
 
-  #// Process output file name and options
 
-  #      _prefix_saving `saving'
-  #    local saving `"`s(filename)'"'
-  #    local replace `"`s(replace)'"'
-  #    local double `"`s(double)'"'
-  #    local every `"`s(every)'"'
-  #
-  #    // Initialize Lambda matrix
-  #
-  #    tempname Lambda Xi
-  #    local nvars : word count `varlist'
-  #    matrix `Lambda' = J(`nvars',`ntypes',0)
-  #    matrix `Xi'' = J(1, `ntypes', 0)
   nvars <- ncol(data_dummy)
   Lambda <- matrix(0, nrow = nvars, ncol = ntypes)
-  zmeans <- matrix(0, nrow = nrow(data_dummy), ncol = nvars)
   Xi <- matrix(0, nrow = 1, ncol = ntypes)
 
-  #// Form expression list for posting
-  #
-  #    for(k in 1:ntypes){
-  #      for(j in 1:nvars){
-  #
-  #      }
-  #    }
-  #      forvalues k = 1/`ntypes' {
-  #        forvalues j = 1/`nvars' {
-  #	 	local explist `explist' (`Lambda'[`j',`k'])
-  #      }
-  #  }
-  #  tempname a0
-  #  local explist `explist' (scalar(`a0'))
-  #forvalues k = 1/`ntypes' {
-  #  local explist `explist' (`Xi'[1,`k'])
-  #}
-
-  #  // Initialize mata matrices
-
-  temp <- setup(data_dummy, ntypes, alpha)
-  ugom_X <- temp$ugom_X
-  ugom_g <- temp$ugom_g
-  ugom_alpha <- temp$ugom_alpha
-  ugom_L <- temp$ugom_L
   a0 <- vector(length = burnin+ngibbs)
+  xis <- matrix(0, nrow = burnin+ngibbs, ncol = ntypes)
   alphas <- matrix(0, nrow = burnin+ngibbs, ncol = ntypes)
   g_dist <- list()
-  z_dist <- list()
   lambda_dist <- list()
   cat("MCMC Iteration: \n")
   pb = utils::txtProgressBar(min = 0, max = burnin+ngibbs, initial = 0, style = 3, width = 60)
   for(i in 1:(burnin+ngibbs)){
 
     if(i <= burnin){
-      temp <- ugom_gibbs_iter(postg = 0, ugom_X = ugom_X, ugom_alpha = ugom_alpha, ugom_L = ugom_L, ugom_g = ugom_g, gmeans = gmeans, zmeans = zmeans, Lambda = Lambda, omega = omega, eta = eta, tau = tau, beta = beta)
+      temp <- ugom_gibbs_iter(postg = 0, ugom_X = ugom_X, ugom_alpha = ugom_alpha, ugom_L = ugom_L, ugom_g = ugom_g, gmeans = gmeans, Lambda = Lambda, omega = omega, eta = eta, tau = tau, beta = beta)
       Xi <- temp$Xi
       a0[i] <- temp$a0
+      xis[i, ] <- temp$Xi
       alphas[i,] <- temp$ugom_alpha
-      ugom_X <- temp$ugom_X
       ugom_g <- temp$ugom_g
       g_dist[[i]] <- ugom_g
       ugom_alpha <- temp$ugom_alpha
       ugom_L <- temp$ugom_L
       lambda_dist[[i]] <- ugom_L
-      z_dist[[i]] <- temp$ugom_z
     } else{
-      temp <- ugom_gibbs_iter(postg = 1, ugom_X = ugom_X, ugom_alpha = ugom_alpha, ugom_L = ugom_L, ugom_g = ugom_g, gmeans = gmeans, zmeans = zmeans, Lambda = Lambda, omega = omega, eta = eta, tau = tau, beta = beta)
+      temp <- ugom_gibbs_iter(postg = 1, ugom_X = ugom_X, ugom_alpha = ugom_alpha, ugom_L = ugom_L, ugom_g = ugom_g, gmeans = gmeans, Lambda = Lambda, omega = omega, eta = eta, tau = tau, beta = beta)
       Lambda <- temp$Lambda
       Xi <- temp$Xi
       a0[i] <- temp$a0
+      xis[i, ] <- temp$Xi
       alphas[i,] <- temp$ugom_alpha
       ugom_alpha <- temp$ugom_alpha
       gmeans <- temp$gmeans
-      zmeans <- temp$zmeans
-      ugom_X <- temp$ugom_X
       ugom_g <- temp$ugom_g
       g_dist[[i]] <- ugom_g
       ugom_L <- temp$ugom_L
-      z_dist[[i]] <- temp$ugom_z
       lambda_dist[[i]] <- ugom_L
     }
     utils::setTxtProgressBar(pb,i)
   }
-
-
-  #	  // Normalize GoM score variables
-  #
-  #	  local w : word count `gmeans'
-  #	forvalues i = 1/`w' {
-  #	  local gvar : word `i' of `gmeans'
-  #		qui replace `gvar' = `gvar'/`ngibbs' if `touse'
-  #	}
-  #	  end
-
-  #	  mata:
+  cat("\n")
 
   lmeans <- Lambda/ngibbs
   n <- sapply(data, dplyr::n_distinct)
@@ -375,14 +288,23 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 1000, ngibbs = 1000
 
   lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(.data$K1/.data$prop,4),
                                      lmfr2 = round(.data$K2/.data$prop, 4))
+  lmeans <- lmeans %>% dplyr::select(.data$prop, .data$K1, .data$K2, .data$lmfr1, .data$lmfr2)
 
 
-  return(list("gmeans" = gmeans/ngibbs, "lmeans" = lmeans, "zmeans" = zmeans/ngibbs, "a0" = a0, "Xi" = Xi, "alphas" = alphas, "Lambda_dist" = lambda_dist, "Gamma_dist" = g_dist, "z_dist" = z_dist))
+  lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
+  lambdas <- round(lambdas, 5)
+  names(lambdas) <- paste0("j", rep(rep(1:ncol(data), unlist(lapply(sapply(data, unique), length))), times = ntypes),
+                           "_l", rep(unlist(lapply(sapply(data, unique), sort)), times = ntypes),
+                           "_k", rep(1:ntypes, each = nvars))
+
+  gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
+  gammas <- round(gammas, 5)
+  names(gammas) <- paste0("i",rep(1:nrow(ugom_X), times = ntypes),"_k", rep(1:ntypes, each = nrow(ugom_X)))
+
+
+  output <- list("gmeans" = gmeans/ngibbs, "lmeans" = lmeans, "a0" = a0, "Xi" = xis, "alphas" = alphas, "Lambda_dist" = lambdas, "Gamma_dist" = gammas)
+
+  class(output) <- "gom_bayes"
+  return(output)
 }
-#'
-#' @examples
-
-
-
-
 
