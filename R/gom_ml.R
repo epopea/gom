@@ -36,7 +36,7 @@
 #' }
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
 #'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
 #'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
@@ -1334,8 +1334,8 @@ gom_ml <- function (data.object = NULL,
     if (is.null(v.order)) {
       cat(paste("\n*Note: Could not organize pure type probabilities with a confidence interval of 99.0%.\n", sep = "", collapse = NULL))
     }
-    cat(paste("\n*Note: Saved frequency table, pure type probabilities and loglikelihood values to ", output, ".\n", sep = "", collapse = NULL))
-    cat(paste("\n*Note: Saved original data with GoM scores to " , getwd(), "/GoMK", initial.K, "(", nf, ")", ".TXT", ".\n", sep = "", collapse = NULL))
+    cat(paste("\n*Note: Saved frequency table, pure type probabilities and loglikelihood values in ", output, ".\n", sep = "", collapse = NULL))
+    cat(paste("\n*Note: Saved original data with GoM scores in " , getwd(), "/GoMK", initial.K, "(", nf, ")", ".TXT", ".\n", sep = "", collapse = NULL))
     return(table)
   }
   #####################END loggom function#
@@ -1542,3 +1542,4 @@ gom_ml <- function (data.object = NULL,
 
   return(FINAL.PARAMETERS)
 }
+

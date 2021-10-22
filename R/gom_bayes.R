@@ -21,7 +21,7 @@
 #' @importFrom  rlang .data
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
 #'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
 #'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
@@ -271,7 +271,8 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lmeans$groups = rep(names(n), times = n)
   lmeans <- lmeans %>%
     dplyr::group_by(.data$groups) %>%
-    dplyr::transmute(K1 = .data$V1/sum(.data$V1),
+    dplyr::transmute(n = dplyr::n(),
+                     K1 = .data$V1/sum(.data$V1),
                      K2 = .data$V2/sum(.data$V2)) %>%
     dplyr::ungroup() %>%
     dplyr::select(-.data$groups) %>%
@@ -288,14 +289,14 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
 
   lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(.data$K1/.data$prop,4),
                                      lmfr2 = round(.data$K2/.data$prop, 4))
-  lmeans <- lmeans %>% dplyr::select(.data$prop, .data$K1, .data$K2, .data$lmfr1, .data$lmfr2)
+  lmeans <- lmeans %>% dplyr::select(.data$prop, n, .data$K1, .data$K2, .data$lmfr1, .data$lmfr2)
 
 
   lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
   lambdas <- round(lambdas, 5)
-  names(lambdas) <- paste0("j", rep(rep(1:ncol(data), unlist(lapply(sapply(data, unique), length))), times = ntypes),
-                           "_l", rep(unlist(lapply(sapply(data, unique), sort)), times = ntypes),
-                           "_k", rep(1:ntypes, each = nvars))
+  names(lambdas) <- paste0("k", rep(1:ntypes, each = nvars),
+                           "j_", rep(rep(1:ncol(data), unlist(lapply(sapply(data, unique), length))), times = ntypes),
+                           "_l", rep(unlist(lapply(sapply(data, unique), sort)), times = ntypes))
 
   gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
   gammas <- round(gammas, 5)

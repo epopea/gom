@@ -7,7 +7,7 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
 #'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
 #'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
@@ -19,7 +19,7 @@
 #' }
 print.gom_bayes <- function(x, ...){
   cat("Bayesian Grade of Membership Mixture Model \n\n")
-  cat("Lambda Descriptive Table \n\n")
+  cat("Descriptive table with the marginal distribution and lambda estimates \n\n")
   print(x$lmeans)
   cat("\n")
 }

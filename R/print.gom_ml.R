@@ -7,7 +7,7 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
 #'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
 #'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
@@ -18,14 +18,24 @@
 #'
 #' print(model)
 #' }
-print.gom_ml <- function(x, ...){
-  profile <- names(which.min(sapply(x, `[[`, 4)))
-  cat("Grade of Membership Mixture Model by Maximum Likelihood \n\n")
+print.gom_ml <- function(x, k = NULL, ...){
+  if(!is.null(k) && is.numeric(k)){
+    cat("Grade of Membership Mixture Model by Maximum Likelihood \n\n")
 
-  cat(paste("Results for model with least AIC:\n\n"))
-  cat("Lambda Descriptive Table \n\n")
-  writeLines(x[[profile]]$Table)
-  cat("\n")
-  cat("Likelihood: \t", x[[profile]]$Likelihood, "\n")
-  cat("AIC: \t\t", x[[profile]]$AIC, "\n")
+    cat("Descriptive table with the marginal distribution and lambda estimates \n\n")
+    writeLines(x[[k]]$Table)
+    cat("\n")
+    cat("Likelihood: \t", x[[k]]$Likelihood, "\n")
+    cat("AIC: \t\t", x[[k]]$AIC, "\n")
+  } else{
+    profile <- names(which.min(sapply(x, `[[`, 4)))
+    cat("Grade of Membership Mixture Model by Maximum Likelihood \n\n")
+
+    cat(paste("Model results for the smallest AIC:\n\n"))
+    cat("Descriptive table with the marginal distribution and lambda estimates \n\n")
+    writeLines(x[[profile]]$Table)
+    cat("\n")
+    cat("Likelihood: \t", x[[profile]]$Likelihood, "\n")
+    cat("AIC: \t\t", x[[profile]]$AIC, "\n")
+  }
 }
