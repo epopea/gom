@@ -4,18 +4,24 @@
 \alias{print.gom_ml}
 \title{Print for \code{gom_ml} objects}
 \usage{
-\method{print}{gom_ml}(x, ...)
+\method{print}{gom_ml}(x, k = NULL, ...)
 }
 \arguments{
 \item{x}{An object with class \emph{gom_ml}.}
+
+\item{k}{Number indicating the pure type result to be printed.}
 
 \item{...}{Further arguments passed to or from other methods.}
 }
 \description{
 Print objects with class \emph{gom_ml}.
 }
+\details{
+Prints the descriptive table inside the gom_ml object along with the likelihood and
+AIC for the desired pure type set. If k is NULL (default), it chooses the model with the smallest AIC.
+}
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
                    x2 = round(stats::runif(n = 500, 1, 3), 0),
                    x3 = round(stats::runif(n = 500, 1, 4), 0),

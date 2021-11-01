@@ -64,6 +64,7 @@ gom_ml <- function (data.object = NULL,
                     MC_iter = 1000) {
 
   data.object <- as.data.frame(data.object)
+  tempdir <- tempdir()
 
   GoM <- '
     using namespace std;
@@ -1155,8 +1156,8 @@ gom_ml <- function (data.object = NULL,
     nf <- 0
     repeat {
       nf <- (nf + 1)
-      dataoutput <- paste (getwd(), "/GoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
-      logname <- paste (getwd(), "/LogGoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
+      dataoutput <- paste (tempdir, "/GoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
+      logname <- paste (tempdir, "/LogGoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
       if ((file.exists(dataoutput) == FALSE) && (file.exists(logname) == FALSE)) {
         break
       }
@@ -1176,7 +1177,7 @@ gom_ml <- function (data.object = NULL,
                       gamma.algorithm, lambda.algorithm,
                       gamma.fit, lambda.fit, order.K, omega.fit,
                       cell, ljlevels, l.levels.j, IP, FP, loglik, nf, dec.char, v.order) {
-    output <- paste (getwd(), "/LogGoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
+    output <- paste (tempdir, "/LogGoMK", initial.K, "(", nf, ")", ".TXT", sep = "", collapse = NULL)
     file.create(output)
     sink(output)
     cat(paste(date(), "\n\n", sep = "", collapse = NULL))
@@ -1335,7 +1336,7 @@ gom_ml <- function (data.object = NULL,
       cat(paste("\n*Note: Could not organize pure type probabilities with a confidence interval of 99.0%.\n", sep = "", collapse = NULL))
     }
     cat(paste("\n*Note: Saved frequency table, pure type probabilities and loglikelihood values in ", output, ".\n", sep = "", collapse = NULL))
-    cat(paste("\n*Note: Saved original data with GoM scores in " , getwd(), "/GoMK", initial.K, "(", nf, ")", ".TXT", ".\n", sep = "", collapse = NULL))
+    cat(paste("\n*Note: Saved original data with GoM scores in " , tempdir, "/GoMK", initial.K, "(", nf, ")", ".TXT", ".\n", sep = "", collapse = NULL))
     return(table)
   }
   #####################END loggom function#
@@ -1372,9 +1373,9 @@ gom_ml <- function (data.object = NULL,
   if ((dec.char != ",") && (dec.char != ".")) {
     dec.char <- "."
   }
-  pathfolder <- getwd()
-  default.scipen <- options("scipen")
-  default.digits <- options("digits")
+  pathfolder <- tempdir
+  oldoptions <- options()
+  on.exit(options(oldoptions))
   options(digits = 15)
   FINAL.PARAMETERS <- vector("list")
   for (initial.K in initial.K:final.K) {
@@ -1472,11 +1473,11 @@ gom_ml <- function (data.object = NULL,
       }
     }
     #################################################################
-    newfolder <- paste("K", initial.K, sep = "", collapse = NULL)
+    newfolder <- paste(pathfolder, "/K", initial.K, sep = "", collapse = NULL)
     if (file.exists(newfolder) == FALSE) {
       dir.create(newfolder, showWarnings = TRUE, recursive = FALSE, mode = "0777")
     }
-    setwd(paste(pathfolder, "/K", initial.K, sep = "", collapse = NULL))
+
     cell <- as.data.frame(cell)
     cell$Patterns <- do.call(paste, c(as.list(cell[c(internal.var)]), sep=""))
     FG <- as.data.frame(round(FG, 4))
@@ -1505,7 +1506,6 @@ gom_ml <- function (data.object = NULL,
                     gamma.algorithm, lambda.algorithm,
                     gamma.fit, lambda.fit, order.K, omega.fit,
                     cell, ljlevels, l.levels.j, IP, FP, loglik, nf, dec.char, v.order)
-    setwd(pathfolder)
     FG <- FG[-1, -1]
     row.names(FG) <- NULL
     if ((order.K == TRUE) && (!is.null(v.order))){
@@ -1535,8 +1535,6 @@ gom_ml <- function (data.object = NULL,
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$AIC <- AIC
     FINAL.PARAMETERS[[paste0("K", initial.K)]]$Table <- table
   }
-  options(scipen = default.scipen[[1]])
-  options(digits = default.digits[[1]])
 
   class(FINAL.PARAMETERS) <- "gom_ml"
 

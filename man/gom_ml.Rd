@@ -80,7 +80,7 @@ by the probabilities of answering a category of each question, along with a set 
 of membership) that measures each subject’s degree of similarity to each extreme profile (reference group).
 }
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
                    x2 = round(stats::runif(n = 500, 1, 3), 0),
                    x3 = round(stats::runif(n = 500, 1, 4), 0),

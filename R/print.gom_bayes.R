@@ -1,9 +1,11 @@
 #' @title Print for \code{gom_bayes} objects
 #'
-#' @description Print objects with class \emph{gom_bayes}.
+#' @description Print method for an objects of class \emph{gom_bayes}.
 #'
 #' @param x An object with class \emph{gom_bayes}.
 #' @param ... Further arguments passed to or from other methods.
+#'
+#' @details Prints a descriptive table with the posterior lambdas organized by variables and their categories.
 #'
 #' @export
 #' @examples
