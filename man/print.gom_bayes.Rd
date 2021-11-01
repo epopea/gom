@@ -14,8 +14,11 @@
 \description{
 Print objects with class \emph{gom_bayes}.
 }
+\details{
+Prints a descriptive table with the posterior lambdas organized by variables and their categories.
+}
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
                    x2 = round(stats::runif(n = 500, 1, 3), 0),
                    x3 = round(stats::runif(n = 500, 1, 4), 0),

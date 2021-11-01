@@ -3,7 +3,12 @@
 #' @description Print objects with class \emph{gom_ml}.
 #'
 #' @param x An object with class \emph{gom_ml}.
+#' @param k Number indicating the pure type result to be printed.
 #' @param ... Further arguments passed to or from other methods.
+#'
+#' @details Prints the descriptive table inside the gom_ml object along with the likelihood and
+#' AIC for the desired pure type set. If k is NULL (default), it chooses the model with the smallest AIC.
+#'
 #'
 #' @export
 #' @examples

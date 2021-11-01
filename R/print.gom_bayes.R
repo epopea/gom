@@ -5,6 +5,9 @@
 #' @param x An object with class \emph{gom_bayes}.
 #' @param ... Further arguments passed to or from other methods.
 #'
+#' @details Prints a descriptive table with the posterior lambdas organized by variables and their categories.
+#'
+#'
 #' @export
 #' @examples
 #' \donttest{

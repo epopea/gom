@@ -7,7 +7,7 @@ Authors@R: c(
     person("Julimar", "Pinto", role = "ctb"),
     person("Andre", "Caetano", role = "ctb"))
 Maintainer: Jeferson Andrade <jeferson@epopea.com.br>
-Description: Implements the cross-sectional version of the grade of membership mixture model in two different estimation methods: Maximum likelihood and Bayesian.
+Description: Implements the cross-sectional version of the grade of membership mixture model in two different estimation methods: Maximum likelihood, described by Manton, K. G.; Woodbury, M. A. and Tolley, H. D (1994, ISBN: 0471545619) and Guedes, G. R.; Siviero, P. C. L.; Machado, C. J.; Pinto, J. and Rodarte, M. M. S. (2016, ISBN: 9788542301885); and Bayesian by Erosheva, E. A.; Fienberg, S. E. and Joutard, C. (2007) <doi: 10.1214/07-AOAS126>.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: false
