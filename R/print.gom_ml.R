@@ -9,19 +9,20 @@
 #' @details Prints the descriptive table inside the gom_ml object along with the likelihood and
 #' AIC for the desired pure type set. If k is NULL (default), it chooses the model with the smallest AIC.
 #'
+#' @return No return value.
+#'
 #' @export
 #' @examples
-#' \donttest{
-#' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
-#'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
-#'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
-#'                    x4 = round(stats::runif(n = 500, 1, 5), 0),
-#'                    Id = 1:500)
 #'
-#' model <- gom_ml(data.object = data, case.id = "Id", initial.lambda = "random")
+#' data <- data.frame(x1 = round(stats::runif(n = 50, 1, 2), 0),
+#'                    x2 = round(stats::runif(n = 50, 1, 2), 0),
+#'                    x3 = round(stats::runif(n = 50, 1, 2), 0),
+#'                    Id = 1:50)
+#'
+#' model <- gom::gom_ml(data.object = data, case.id = "Id", initial.lambda = "random", MC_iter = 150)
 #'
 #' print(model)
-#' }
+#'
 print.gom_ml <- function(x, k = NULL, ...){
   if(!is.null(k) && is.numeric(k)){
     cat("Grade of Membership Mixture Model by Maximum Likelihood \n\n")

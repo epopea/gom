@@ -11,21 +11,23 @@
 
 \item{...}{Further arguments passed to or from other methods.}
 }
+\value{
+No return value.
+}
 \description{
-Print objects with class \emph{gom_bayes}.
+Print method for an objects of class \emph{gom_bayes}.
 }
 \details{
 Prints a descriptive table with the posterior lambdas organized by variables and their categories.
 }
 \examples{
-\donttest{
-data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
-                   x2 = round(stats::runif(n = 500, 1, 3), 0),
-                   x3 = round(stats::runif(n = 500, 1, 4), 0),
-                   x4 = round(stats::runif(n = 500, 1, 5), 0))
 
-model <- gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
+data <- data.frame(x1 = round(stats::runif(n = 50, 1, 2), 0),
+                   x2 = round(stats::runif(n = 50, 1, 3), 0),
+                   x3 = round(stats::runif(n = 50, 1, 4), 0))
+
+model <- gom::gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
 
 print(model)
-}
+
 }

@@ -80,13 +80,11 @@ by the probabilities of answering a category of each question, along with a set 
 of membership) that measures each subject’s degree of similarity to each extreme profile (reference group).
 }
 \examples{
-\donttest{
-data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
-                   x2 = round(stats::runif(n = 500, 1, 3), 0),
-                   x3 = round(stats::runif(n = 500, 1, 4), 0),
-                   x4 = round(stats::runif(n = 500, 1, 5), 0),
-                   Id = 1:500)
 
-gom_ml(data.object = data, case.id = "Id", initial.lambda = "random")
-}
+data <- data.frame(x1 = round(stats::runif(n = 100, 1, 2), 0),
+                   x2 = round(stats::runif(n = 100, 1, 3), 0),
+                   Id = 1:100)
+
+gom_ml(data.object = data, case.id = "Id", initial.lambda = "random", MC_iter = 300)
+
 }
