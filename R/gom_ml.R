@@ -36,15 +36,13 @@
 #' }
 #' @export
 #' @examples
-#' \donttest{
-#' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
-#'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
-#'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
-#'                    x4 = round(stats::runif(n = 500, 1, 5), 0),
-#'                    Id = 1:500)
 #'
-#' gom_ml(data.object = data, case.id = "Id", initial.lambda = "random")
-#' }
+#' data <- data.frame(x1 = round(stats::runif(n = 100, 1, 2), 0),
+#'                    x2 = round(stats::runif(n = 100, 1, 3), 0),
+#'                    Id = 1:100)
+#'
+#' gom_ml(data.object = data, case.id = "Id", initial.lambda = "random", MC_iter = 300)
+#'
 gom_ml <- function (data.object = NULL,
                     initial.K = 2, final.K = initial.K,
                     gamma.algorithm = c("gradient.1992", "woodbury.1974"),
@@ -1473,7 +1471,7 @@ gom_ml <- function (data.object = NULL,
       }
     }
     #################################################################
-    newfolder <- paste(pathfolder, "/K", initial.K, sep = "", collapse = NULL)
+    newfolder <- paste(pathfolder, "/K", initial.K,"/", sep = "", collapse = NULL)
     if (file.exists(newfolder) == FALSE) {
       dir.create(newfolder, showWarnings = TRUE, recursive = FALSE, mode = "0777")
     }

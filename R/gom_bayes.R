@@ -21,16 +21,17 @@
 #' @importFrom  rlang .data
 #' @export
 #' @examples
-#' \donttest{
-#' data <- data.frame(x1 = round(stats::runif(n = 500, 1, 2), 0),
-#'                    x2 = round(stats::runif(n = 500, 1, 3), 0),
-#'                    x3 = round(stats::runif(n = 500, 1, 4), 0),
-#'                    x4 = round(stats::runif(n = 500, 1, 5), 0))
 #'
-#' gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
-#' }
+#' data <- data.frame(x1 = round(stats::runif(n = 50, 1, 2), 0),
+#'                    x2 = round(stats::runif(n = 50, 1, 3), 0),
+#'                    x3 = round(stats::runif(n = 50, 1, 4), 0))
+#'
+#' gom::gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
+#'
 gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
                       omega = 50, eta = 10, tau = 2, beta = 2, gomscores = "g"){
+
+  data <- dplyr::mutate(data, dplyr::across(.fns = as.factor))
 
   data_dummy <- fastDummies::dummy_cols(data, select_columns = names(data), remove_selected_columns = TRUE)
 
@@ -295,7 +296,7 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
   lambdas <- round(lambdas, 5)
   names(lambdas) <- paste0("k", rep(1:ntypes, each = nvars),
-                           "j_", rep(rep(1:ncol(data), unlist(lapply(sapply(data, unique), length))), times = ntypes),
+                           "j_", rep(rep(1:ncol(data), unlist(lapply(sapply(data, levels), length))), times = ntypes),
                            "_l", rep(unlist(lapply(sapply(data, unique), sort)), times = ntypes))
 
   gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
