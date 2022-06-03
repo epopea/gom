@@ -296,8 +296,8 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
   lambdas <- round(lambdas, 5)
   names(lambdas) <- paste0("k", rep(1:ntypes, each = nvars),
-                           "j_", rep(rep(1:ncol(data), unlist(lapply(sapply(data, levels), length))), times = ntypes),
-                           "_l", rep(unlist(lapply(sapply(data, unique), sort)), times = ntypes))
+                           "j_", rep(rep(1:ncol(data), unlist(lapply(as.data.frame(sapply(data, levels)), length))), times = ntypes),
+                           "_l", rep(unlist(lapply(sapply(data, levels), sort)), times = ntypes))
 
   gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
   gammas <- round(gammas, 5)
