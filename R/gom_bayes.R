@@ -293,6 +293,8 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lmeans <- lmeans %>% dplyr::mutate(dplyr::across(.cols = dplyr::starts_with("K"),
                                             .fns = ~.x/.data$prop,
                                             .names = "lmfr{.col}"))
+
+  names(lmeans) <- sub("lmfrK", "lmfr", names(lmeans))
   lmeans <- lmeans %>% dplyr::select(.data$prop, n, dplyr::everything())
 
 
