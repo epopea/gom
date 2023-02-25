@@ -28,7 +28,7 @@
 #'
 #' gom::gom_bayes(data, ntypes = 2, ngibbs = 250, burnin = 250)
 #'
-gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
+gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 10, ngibbs = 20,
                       omega = 50, eta = 10, tau = 2, beta = 2, gomscores = "g"){
 
   data <- dplyr::mutate(data, dplyr::across(.fns = as.factor))
@@ -301,7 +301,7 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
   lambdas <- round(lambdas, 5)
   names(lambdas) <- paste0("k", rep(1:ntypes, each = nvars),
-                           "_j", rep(rep(1:ncol(data), unlist(lapply(sapply(data, levels), length))), times = ntypes),
+                           "_j", rep(rep(1:ncol(data), unlist(lapply(sapply(data, levels, simplify = F), length))), times = ntypes),
                            "_l", rep(unlist(lapply(sapply(data, levels), sort)), times = ntypes))
 
   gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
