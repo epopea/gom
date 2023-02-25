@@ -273,11 +273,13 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lmeans <- lmeans %>%
     dplyr::group_by(.data$groups) %>%
     dplyr::transmute(n = dplyr::n(),
-                     K1 = .data$V1/sum(.data$V1),
-                     K2 = .data$V2/sum(.data$V2)) %>%
+                     dplyr::across(.cols = dplyr::starts_with("V"),
+                                   .fns = ~.x/sum(.x))) %>%
     dplyr::ungroup() %>%
     dplyr::select(-.data$groups) %>%
     round(4)
+  names(lmeans) <- sub("V", "K", names(lmeans))
+
   names <- vector()
   for(i in 1:length(n)){
     names <- c(names, paste0(names(n[i]), "_", 1:n[i]))
@@ -288,15 +290,16 @@ gom_bayes <- function(data, ntypes = 2, alpha = "", burnin = 250, ngibbs = 250,
   lmeans$prop <- sapply(data_dummy, mean)
   lmeans$prop <- round(lmeans$prop, 4)
 
-  lmeans <- lmeans %>% dplyr::mutate(lmfr1 = round(.data$K1/.data$prop,4),
-                                     lmfr2 = round(.data$K2/.data$prop, 4))
-  lmeans <- lmeans %>% dplyr::select(.data$prop, n, .data$K1, .data$K2, .data$lmfr1, .data$lmfr2)
+  lmeans <- lmeans %>% dplyr::mutate(dplyr::across(.cols = dplyr::starts_with("K"),
+                                            .fns = ~.x/.data$prop,
+                                            .names = "lmfr{.col}"))
+  lmeans <- lmeans %>% dplyr::select(.data$prop, n, dplyr::everything())
 
 
   lambdas <- as.data.frame(t(sapply(lambda_dist, `[`, 1:nvars, 1:ntypes)))
   lambdas <- round(lambdas, 5)
   names(lambdas) <- paste0("k", rep(1:ntypes, each = nvars),
-                           "j_", rep(rep(1:ncol(data), unlist(lapply(as.data.frame(sapply(data, levels)), length))), times = ntypes),
+                           "_j", rep(rep(1:ncol(data), unlist(lapply(sapply(data, levels), length))), times = ntypes),
                            "_l", rep(unlist(lapply(sapply(data, levels), sort)), times = ntypes))
 
   gammas <- as.data.frame(t(sapply(g_dist, `[`, 1:nrow(ugom_X), 1:ntypes)))
